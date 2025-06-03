@@ -1,27 +1,27 @@
 import { useState, useEffect, useRef } from 'react'
-import { useFrame, useXR } from '@react-three/xr'
+import { useFrame, useXR, useController } from '@react-three/xr'
 import { Text, Float, useTexture } from '@react-three/drei'
 import * as THREE from 'three'
 import { useAudio } from './useAudio'
+import { LaserGun } from './LaserGun'
+import { LaserBeam } from './LaserBeam'
 
 const TARGET_COUNT = 5
 const GAME_DURATION = 60 // seconds
 
 export function GameScene({ setScore }) {
-  const { player } = useXR()
+  const { player, controllers } = useXR()
   const [targets, setTargets] = useState([])
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION)
   const [gameOver, setGameOver] = useState(false)
+  const [lasers, setLasers] = useState([])
   const scoreRef = useRef(0)
   
-  // Cyberpunk textures
-  const neonTexture = useTexture({
-    map: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF/BoxTextured0_baseColor.png',
-    emissiveMap: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF/BoxTextured0_baseColor.png'
-  })
+  const rightController = useController('right')
+  const leftController = useController('left')
   
   // Audio effects
-  const { playTargetSound, playBackgroundMusic } = useAudio()
+  const { playTargetSound, playBackgroundMusic, playLaserSound } = useAudio()
   
   useEffect(() => {
     playBackgroundMusic()
@@ -49,7 +49,6 @@ export function GameScene({ setScore }) {
   }, [])
   
   const createTarget = () => {
-    // Position targets in a circle around the player
     const angle = Math.random() * Math.PI * 2
     const distance = 1 + Math.random() * 3
     const height = -0.5 + Math.random() * 1.5
@@ -89,6 +88,46 @@ export function GameScene({ setScore }) {
     }, 1000)
   }
   
+  const handleTrigger = (controller) => {
+    if (!controller || gameOver) return
+    
+    playLaserSound()
+    
+    const grip = controller.grip
+    const position = new THREE.Vector3()
+    const direction = new THREE.Vector3(0, 0, -1)
+    grip.getWorldPosition(position)
+    grip.getWorldDirection(direction)
+    
+    // Add new laser
+    const laserId = Date.now()
+    setLasers(prev => [...prev, {
+      id: laserId,
+      position,
+      direction,
+      active: true
+    }])
+    
+    // Remove laser after short time
+    setTimeout(() => {
+      setLasers(prev => prev.filter(l => l.id !== laserId))
+    }, 100)
+  }
+  
+  useEffect(() => {
+    if (!rightController) return
+    
+    const controller = rightController.inputSource
+    const grip = rightController.grip
+    
+    const onSelectStart = () => handleTrigger(rightController)
+    
+    grip.addEventListener('selectstart', onSelectStart)
+    return () => {
+      grip.removeEventListener('selectstart', onSelectStart)
+    }
+  }, [rightController, gameOver])
+  
   useFrame(() => {
     if (gameOver) return
     
@@ -96,18 +135,15 @@ export function GameScene({ setScore }) {
     setTargets(prev => prev.map(target => {
       if (target.hit) return target
       
-      // Move target
       const newPosition = [
         target.position[0] + target.direction.x * 0.01 * target.speed,
         target.position[1] + target.direction.y * 0.01 * target.speed,
         target.position[2] + target.direction.z * 0.01 * target.speed
       ]
       
-      // Simple boundary check
       if (Math.abs(newPosition[0]) > 5 || 
           Math.abs(newPosition[1]) > 3 || 
           Math.abs(newPosition[2]) > 5) {
-        // Change direction
         return {
           ...target,
           direction: new THREE.Vector3(
@@ -141,11 +177,10 @@ export function GameScene({ setScore }) {
           <mesh
             position={target.position}
             scale={target.scale}
-            onClick={() => handleTargetHit(target.id)}
+            userData={{ isTarget: true, targetId: target.id }}
           >
             <icosahedronGeometry args={[0.3, 0]} />
             <meshStandardMaterial 
-              {...neonTexture}
               color={target.color}
               emissive={target.color}
               emissiveIntensity={2}
@@ -154,6 +189,25 @@ export function GameScene({ setScore }) {
             />
           </mesh>
         </Float>
+      ))}
+      
+      {/* Laser guns */}
+      {rightController && (
+        <LaserGun hand="right" />
+      )}
+      {leftController && (
+        <LaserGun hand="left" />
+      )}
+      
+      {/* Laser beams */}
+      {lasers.map((laser) => (
+        <LaserBeam
+          key={laser.id}
+          start={laser.position}
+          direction={laser.direction}
+          onHit={handleTargetHit}
+          active={laser.active}
+        />
       ))}
       
       {/* Game over screen */}
