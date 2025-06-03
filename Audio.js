@@ -3,16 +3,15 @@ import * as Tone from 'tone'
 
 export function useAudio() {
   const backgroundMusicRef = useRef(null)
+  const laserSoundRef = useRef(null)
   
   const playBackgroundMusic = () => {
-    // Create a synth and connect it to the main output
     const synth = new Tone.PolySynth(Tone.Synth).toDestination()
     const filter = new Tone.Filter(800, "lowpass").toDestination()
     const reverb = new Tone.Reverb(3).toDestination()
     synth.connect(filter)
     synth.connect(reverb)
     
-    // Synthwave arpeggio
     const loop = new Tone.Loop(time => {
       const notes = ["C4", "E4", "G4", "B4", "C5", "B4", "G4", "E4"]
       const note = notes[Math.floor(Math.random() * notes.length)]
@@ -46,6 +45,27 @@ export function useAudio() {
     synth.triggerAttackRelease("C6", "16n")
   }
   
+  const playLaserSound = () => {
+    if (!laserSoundRef.current) {
+      laserSoundRef.current = new Tone.MembraneSynth({
+        pitchDecay: 0.05,
+        octaves: 5,
+        oscillator: {
+          type: "square"
+        },
+        envelope: {
+          attack: 0.001,
+          decay: 0.1,
+          sustain: 0.1,
+          release: 0.2,
+          attackCurve: "exponential"
+        }
+      }).toDestination()
+    }
+    
+    laserSoundRef.current.triggerAttackRelease("A2", "16n")
+  }
+  
   useEffect(() => {
     return () => {
       if (backgroundMusicRef.current) {
@@ -55,11 +75,15 @@ export function useAudio() {
         backgroundMusicRef.current.filter.dispose()
         backgroundMusicRef.current.reverb.dispose()
       }
+      if (laserSoundRef.current) {
+        laserSoundRef.current.dispose()
+      }
     }
   }, [])
   
   return {
     playTargetSound,
-    playBackgroundMusic
+    playBackgroundMusic,
+    playLaserSound
   }
 }
