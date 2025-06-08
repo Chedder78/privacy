@@ -1,0 +1,8 @@
+"scripts": {
+  "dev": "vite",
+  "build": "vite build",
+  "preview": "vite preview",
+  "prepare-models": "gltf-pipeline -i public/assets/models/raw/atlantis.gltf -o public/assets/models/atlantis.glb",
+  "generate-marker": "npx mind-ar-ts image-target-compiler public/targets/target.png --output public/targets/target.mind",
+  "deploy": "gh-pages -d dist"
+}
