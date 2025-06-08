@@ -12,43 +12,50 @@
       position: absolute;
       top: 0;
       background-color: rgba(0, 0, 0, 0.8);
-      z-index: 9999;
       display: flex;
       justify-content: center;
       align-items: center;
       color: white;
     }
+    a-scene { display: none; } /* Hide until loaded */
   </style>
 </head>
-<body style="margin: 0; overflow: hidden;">
+<body>
   <!-- Loading Screen -->
   <div class="arjs-loader">
-    <h2>Loading AR... Point camera at marker</h2>
+    <h2>Loading... Point camera at Hiro marker</h2>
+    <img src="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" width="200" alt="Hiro Marker">
   </div>
 
-  <!-- A-Frame Scene -->
+  <!-- AR Scene -->
   <a-scene 
     vr-mode-ui="enabled: false"
     arjs="sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
     renderer="logarithmicDepthBuffer: true;"
   >
-    <!-- Marker -->
+    <!-- Default Hiro Marker -->
     <a-marker preset="hiro">
       <!-- Underwater Objects -->
-      <a-entity gltf-model="https://cdn.glitch.com/your-model.glb" 
-               scale="0.5 0.5 0.5" 
-               position="0 0.5 0">
+      <a-entity 
+        gltf-model="https://cdn.jsdelivr.net/gh/DonKarlssonSan/threejs-examples@master/underwater/scene.glb"
+        scale="0.5 0.5 0.5"
+        position="0 0.5 0"
+        animation="property: rotation; to: 0 360 0; loop: true; dur: 10000">
       </a-entity>
       
-      <a-box position="-1 0.5 0" color="blue" opacity="0.5"></a-box>
+      <a-entity 
+        light="type: ambient; color: #44ccff; intensity: 0.5">
+      </a-entity>
     </a-marker>
     
     <a-entity camera></a-entity>
   </a-scene>
 
   <script>
+    // Hide loader when AR is ready
     document.querySelector('a-scene').addEventListener('loaded', () => {
       document.querySelector('.arjs-loader').style.display = 'none';
+      document.querySelector('a-scene').style.display = 'block';
     });
   </script>
 </body>
