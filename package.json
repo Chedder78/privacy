@@ -1,8 +1,0 @@
-"dependencies": {
-  "three": "^0.158.0",
-  "@react-three/fiber": "^8.14.0",
-  "@react-three/drei": "^9.94.3",
-  "mind-ar": "^1.2.1",
-  "mind-ar-image-three": "^0.10.2",
-  "vite-plugin-mindar": "^1.0.5"
-}
