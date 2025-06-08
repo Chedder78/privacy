@@ -1,22 +1,16 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import mindAR from 'vite-plugin-mindar';
 
 export default defineConfig({
-  plugins: [react()],
-  base: '/spirited-atlantis/',
+  plugins: [
+    react(),
+    mindAR({ 
+      imgtargets: ['public/targets/target.png'] 
+    })
+  ],
+  base: './', // Critical for asset loading
   build: {
-    outDir: 'dist',
-    assetsInlineLimit: 4096, // Optimize asset handling
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          three: ['three', '@react-three/fiber'],
-          ar: ['mind-ar-image-three']
-        }
-      }
-    }
-  },
-  server: {
-    https: true // Required for AR in dev
+    assetsInlineLimit: 0 // Disable asset inlining
   }
-})
+});
