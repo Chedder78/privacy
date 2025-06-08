@@ -1,22 +1,32 @@
-import { useFrame } from '@react-three/fiber'
-import { Environment, Float } from '@react-three/drei'
-import { Jellyfish } from './Jellyfish'
+import { useEffect } from 'react'
+import { MindARThree } from 'mindar-image-three'
 
 export function ARScene() {
-  useFrame((state) => {
-    // Gentle underwater movement
-    state.scene.rotation.z = Math.sin(state.clock.elapsedTime * 0.5) * 0.02
-  })
-
-  return (
-    <>
-      <Environment preset="night" />
-      <ambientLight intensity={0.5} />
-      <pointLight position={[10, 10, 10]} intensity={1} color="#44ccff" />
-      
-      <Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
-        <Jellyfish position={[0, 0, 0]} />
-      </Float>
-    </>
-  )
+  useEffect(() => {
+    const mindarThree = new MindARThree({
+      container: document.body,
+      imageTargetSrc: './targets.mind' // we'll create this
+    })
+    
+    const { renderer, scene, camera } = mindarThree
+    const anchor = mindarThree.addAnchor(0)
+    
+    // Add your 3D content to anchor.group
+    anchor.group.add(/* your objects */)
+    
+    const start = async () => {
+      await mindarThree.start()
+      renderer.setAnimationLoop(() => {
+        renderer.render(scene, camera)
+      })
+    }
+    start()
+    
+    return () => {
+      renderer.setAnimationLoop(null)
+      mindarThree.stop()
+    }
+  }, [])
+  
+  return null
 }
