@@ -1,12 +1,10 @@
-import { Canvas } from '@react-three/fiber'
-import { ARScene } from './components/ARScene'
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import ARManager from './components/ARManager'
+import './styles.css'
 
-export default function App() {
-  return (
-    <div style={{ width: '100vw', height: '100vh' }}>
-      <Canvas camera={{ position: [0, 0, 5], fov: 50 }}>
-        <ARScene />
-      </Canvas>
-    </div>
-  )
-}
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <ARManager />
+  </StrictMode>
+)
