@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Atlantis AR</title>
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.min.js"></script>
+  <style>
+    .arjs-loader {
+      height: 100vh;
+      width: 100%;
+      position: absolute;
+      top: 0;
+      background-color: rgba(0, 0, 0, 0.8);
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+    }
+  </style>
+</head>
+<body style="margin: 0; overflow: hidden;">
+  <!-- Loading Screen -->
+  <div class="arjs-loader">
+    <h2>Loading AR... Point camera at marker</h2>
+  </div>
+
+  <!-- A-Frame Scene -->
+  <a-scene 
+    vr-mode-ui="enabled: false"
+    arjs="sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
+    renderer="logarithmicDepthBuffer: true;"
+  >
+    <!-- Marker -->
+    <a-marker preset="hiro">
+      <!-- Underwater Objects -->
+      <a-entity gltf-model="https://cdn.glitch.com/your-model.glb" 
+               scale="0.5 0.5 0.5" 
+               position="0 0.5 0">
+      </a-entity>
+      
+      <a-box position="-1 0.5 0" color="blue" opacity="0.5"></a-box>
+    </a-marker>
+    
+    <a-entity camera></a-entity>
+  </a-scene>
+
+  <script>
+    document.querySelector('a-scene').addEventListener('loaded', () => {
+      document.querySelector('.arjs-loader').style.display = 'none';
+    });
+  </script>
+</body>
+</html>
