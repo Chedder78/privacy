@@ -1,4 +1,0 @@
-<a-entity 
-  gltf-model="assets/models/atlantis.glb"
-  scale="0.5 0.5 0.5">
-</a-entity>
